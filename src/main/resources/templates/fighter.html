@@ -1,0 +1,481 @@
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${fighter.name} + ' - Fighter Stats'"></title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<script src="/js/search.js"></script>
+
+<div class="container">
+    <h1 th:text="${fighter.name}"></h1>
+
+    <div class="row">
+        <div class="col-md-4">
+            <h3>Percentiles</h3>
+            <div class="chart-container">
+                <canvas id="percentileChart" style="height:300px"></canvas>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <h3>Win Methods</h3>
+            <div class="chart-container">
+                <canvas id="winChart"></canvas>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <h3>Loss Methods</h3>
+            <div class="chart-container">
+                <canvas id="lossChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Common KO Methods</h3>
+            <table class="table ko-table">
+                <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Count</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="method : ${fighter.commonKOMethods}">
+                    <td th:text="${method.name}"></td>
+                    <td th:text="${method.count}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-md-6">
+            <h3>Common Chin Methods</h3>
+            <table class="table ko-table">
+                <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Count</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="method : ${fighter.commonChinMethods}">
+                    <td th:text="${method.name}"></td>
+                    <td th:text="${method.count}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Favourite Submission Methods</h3>
+            <table class="table submission-table">
+                <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Count</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="method : ${fighter.commonSubmissionMethods}">
+                    <td th:text="${method.name}"></td>
+                    <td th:text="${method.count}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-6">
+            <h3>Submission Methods Against</h3>
+            <table class="table submission-table">
+                <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Count</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="method : ${fighter.commonSubmissionMethodsAgainst}">
+                    <td th:text="${method.name}"></td>
+                    <td th:text="${method.count}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const drawCenterText = (text) => ({
+        id: 'drawCenterText',
+        beforeDraw(chart) {
+            const ctx = chart.ctx;
+            const chartArea = chart.chartArea;
+
+            if (chart.config.type === 'pie' || chart.config.type === 'doughnut') {
+                ctx.save();
+                ctx.font = 'bold 24px Arial';
+                ctx.fillStyle = '#000'; // text color
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                const centerX = (chartArea.left + chartArea.right) / 2;
+                const centerY = (chartArea.top + chartArea.bottom) / 2;
+
+                ctx.fillText(text, centerX, centerY);
+                ctx.restore();
+            }
+        }
+    });
+
+    Chart.register(drawCenterText);
+
+    const winData = {
+        labels: ['Submission', 'Decision', 'KO/TKO'],
+        datasets: [{
+            label: 'Win Methods',
+            data: [
+                [[${fighter.winMethods.submission}]],
+                [[${fighter.winMethods.decision}]],
+                [[${fighter.winMethods.KoTko}]],
+            ],
+            backgroundColor: ['#388E3C', 'rgba(54,162,235,0.79)', '#C62828'],
+            borderWidth: 1
+        }]
+    };
+
+    const lossData = {
+        labels: ['Submission', 'Decision', 'KO/TKO'],
+        datasets: [{
+            label: 'Loss Methods',
+            data: [
+                [[${fighter.lossMethods.submission}]],
+                [[${fighter.lossMethods.decision}]],
+                [[${fighter.lossMethods.KoTko}]],
+            ],
+            backgroundColor: ['#388E3C', 'rgba(54,162,235,0.79)', '#C62828'],
+            borderWidth: 1
+        }]
+    };
+
+    const winTotal = [[${fighter.wins}]];
+    const lossTotal = [[${fighter.losses}]];
+
+    const getWinConfig = () => {
+        if (winTotal === 0) {
+            return {
+                type: 'doughnut',
+                data: {
+                    labels: ['No Wins'],
+                    datasets: [{
+                        data: [1],
+                        backgroundColor: ['#B0BEC5'],
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                generateLabels: (chart) => {
+                                    return [{
+                                        text: 'No Wins',
+                                        fillStyle: '#B0BEC5'
+                                    }];
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Win Methods'
+                        },
+                        datalabels: {
+                            color: '#fff'
+                        }
+                    }
+                },
+                plugins: [drawCenterText("0 Wins")],
+            };
+        }
+
+        return {
+            type: 'doughnut',
+            data: winData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            generateLabels: (chart) => {
+                                const data = chart.data;
+                                return data.labels.map((label, index) => {
+                                    const count = data.datasets[0].data[index];
+                                    return {
+                                        text: `${label}: ${count}`, // Customize label
+                                        fillStyle: data.datasets[0].backgroundColor[index],
+                                        strokeStyle: 'rgba(0,0,0,0)', // Optional stroke
+                                        hidden: false,
+                                        index: index
+                                    };
+                                });
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Win Methods'
+                    },
+                    datalabels: {
+                        formatter: (value, ctx) => {
+                            let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            return ((value / sum) * 100).toFixed(2) + '%';
+                        },
+                        color: '#fff'
+                    }
+                }
+            },
+            plugins: [drawCenterText(winTotal + " Wins")],
+        };
+    };
+
+    const getLossConfig = () => {
+        if (lossTotal === 0) {
+            return {
+                type: 'doughnut',
+                data: {
+                    labels: ['No Losses'],
+                    datasets: [{
+                        data: [1],
+                        backgroundColor: ['#B0BEC5'],
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                generateLabels: (chart) => {
+                                    return [{
+                                        text: 'No Losses',
+                                        fillStyle: '#B0BEC5'
+                                    }];
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Loss Methods'
+                        },
+                        datalabels: {
+                            color: '#fff'
+                        }
+                    }
+                },
+                plugins: [drawCenterText("0 Losses")],
+            };
+        }
+
+        return {
+            type: 'doughnut',
+            data: lossData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            generateLabels: (chart) => {
+                                const data = chart.data;
+                                return data.labels.map((label, index) => {
+                                    const count = data.datasets[0].data[index];
+                                    return {
+                                        text: `${label}: ${count}`, // Customize label
+                                        fillStyle: data.datasets[0].backgroundColor[index],
+                                        strokeStyle: 'rgba(0,0,0,0)', // Optional stroke
+                                        hidden: false,
+                                        index: index
+                                    };
+                                });
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Loss Methods'
+                    },
+                    datalabels: {
+                        formatter: (value, ctx) => {
+                            let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            return ((value / sum) * 100).toFixed(2) + '%';
+                        },
+                        color: '#fff'
+                    }
+                }
+            },
+            plugins: [drawCenterText(lossTotal + " Losses")],
+        };
+    };
+
+    const winChart = new Chart(
+        document.getElementById('winChart'),
+        getWinConfig()
+    );
+
+    const lossChart = new Chart(
+        document.getElementById('lossChart'),
+        getLossConfig()
+    );
+</script>
+
+<script>
+    const percentiles = {
+        wins: [[${percentiles.wins}]],
+        headsKO: [[${percentiles.headsKO}]],
+        tdSub: [[${percentiles.tdSub}]],
+        headsChin: [[${percentiles.headsChin}]],
+        kdAgainst: [[${percentiles.kdAgainst}]],
+        tdAgainst: [[${percentiles.tdAgainst}]],
+        numFights: [[${percentiles.numFights}]],
+        losses: [[${percentiles.losses}]],
+        tdAgainstSub: [[${percentiles.tdAgainstSub}]]
+    };
+    const labels = ["Num Fights", "Wins", "Losses", "Heads/KO", "Heads/Chin", "TD/Sub", "TD/Sub Against", "KD Against", "TD Against"];
+    const data = [
+        percentiles.numFights,
+        percentiles.wins,
+        percentiles.losses,
+        percentiles.headsKO,
+        percentiles.headsChin,
+        percentiles.tdSub,
+        percentiles.tdAgainstSub,
+        percentiles.kdAgainst,
+        percentiles.tdAgainst
+    ];
+
+    const actualValues = [
+    [[${fighter.numFights}]],
+    [[${fighter.wins}]],
+    [[${fighter.losses}]],
+    [[${fighter.headsKO}]],
+    [[${fighter.headsChin}]],
+    [[${fighter.tdSub}]],
+    [[${fighter.tdAgainstSub}]],
+    [[${fighter.kdAgainst}]],
+    [[${fighter.tdAgainst}]]
+];
+
+    const ctx = document.getElementById('percentileChart').getContext('2d');
+    const percentileChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Percentile',
+                data: data,
+                backgroundColor: 'rgba(56, 142, 60, 0.5)',
+                borderColor: 'rgba(56, 142, 60, 1)',
+                borderWidth: 1,
+                barThickness: 10 // Adjust bar thickness if needed
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            layout:{
+                padding:{
+                    right:50, // space for real values
+                }
+            },
+            aspectRatio: 1,
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: {
+                        display: false // Hides grid lines
+                    },
+                },
+                y: {
+                    grid: {
+                        display: false // Hides grid lines
+                    },
+                    ticks:{
+                        padding: 10
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            return `Percentile: ${tooltipItem.raw}`; // Customize tooltip
+                        }
+                    }
+                }
+            },
+        },
+        plugins: [{
+            afterDatasetsDraw: function(chart) {
+                const ctx = chart.ctx;
+                chart.data.datasets.forEach(function(dataset, index) {
+                    const meta = chart.getDatasetMeta(index);
+                    meta.data.forEach(function(bar, barIndex) {
+                        const value = dataset.data[barIndex];
+                        const actualValue = actualValues[barIndex];
+                        const x = bar.x; // Position circle to the right of the bar
+                        const y = bar.y; // Center the circle vertically
+
+                        // truncate long decimals but not integers
+                        const formatValue = (num) => {
+                            if (num === 0) return '0'; // Handle zero
+                            return Number.isInteger(num) ? num.toString() : num.toFixed(1);
+                        };
+                        const formattedValue = formatValue(value);
+                        const formattedActualValue = formatValue(actualValue);
+
+                        // Draw circle
+                        ctx.beginPath();
+                        ctx.arc(x, y, 13, 0, Math.PI * 2); // Circle with radius of 12
+                        ctx.fillStyle = 'rgba(56, 142, 60, 1)'; // Circle color
+                        ctx.fill();
+                        ctx.closePath();
+
+                        // Draw text inside the circle
+                        ctx.save();
+                        ctx.fillStyle = 'white'; // Text color
+                        ctx.font = 'bold 10px Arial'; // Text style
+                        ctx.textAlign = 'center'; // Center text
+                        ctx.textBaseline = 'middle'; // Middle align
+                        ctx.fillText(formattedValue, x, y);
+                        ctx.restore();
+
+                        // Draw the actual value to the right
+                        ctx.save();
+                        ctx.fillStyle = 'rgba(0, 0, 0, 1)'; // Text color
+                        ctx.font = 'bold 13px Arial'; // Text style
+                        ctx.textAlign = 'left'; // Align left
+                        ctx.textBaseline = 'middle'; // Middle align
+                        ctx.fillText(formattedActualValue, chart.chartArea.right + 25, y);
+                        ctx.restore();
+
+                    });
+                });
+            },
+            clip: false
+        }]
+    });
+
+</script>
+
+</body>
+</html>

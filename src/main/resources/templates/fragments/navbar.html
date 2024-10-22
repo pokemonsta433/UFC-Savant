@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+  <title>navbar</title>
+</head>
+
+<body>
+<div th:fragment="navbar">
+  <nav class="navbar d-flex justify-content-between">
+    <a class="navbar-brand logo" th:href="@{/}">
+      tap out trends
+    </a>
+    <div class="position-relative">
+      <form class="form-inline" id="fightersearch">
+        <input
+                class="form-control"
+                type="search"
+                id="fightername"
+                placeholder="search for a fighter"
+                aria-label="search"
+                autocomplete="off"
+                data-search-input
+        />
+        <div id="autocomplete-list" class="autocomplete-items"></div>
+      </form>
+    </div>
+  </nav>
+  <div class="divider"></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,178 @@
+/* Navbar Styles */
+.navbar {
+    background-color: #282c34; /* Dark background */
+    color: white;
+    padding: 10px 20px;
+}
+
+.navbar a {
+    color: #e63946; /* Main accent color */
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.5em;
+}
+
+.navbar .search-bar {
+    width: 250px;
+}
+
+.navbar .divider {
+    border-top: 2px solid #e63946; /* Accent color */
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.logo {
+    font-family: 'Arial', sans-serif;
+    letter-spacing: 1px;
+}
+
+.chart-container {
+    position: relative;
+    margin: auto;
+    height: 100%;
+    width: 100%;
+}
+
+.stats {
+    font-size: 1.2em;
+    margin-top: 10px;
+    width: 65%;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-value {
+    max-width: 100px;
+    text-align: right;
+    margin-left: auto;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.suggestions-list {
+    border: 1px solid #ccc;
+    background-color: white;
+    z-index: 1000; /* Ensure it appears above other content */
+    max-height: 200px; /* Limit height */
+    overflow-y: auto; /* Enable scrolling */
+}
+
+.suggestion-item {
+    padding: 10px;
+    cursor: pointer;
+    color: #333; /* Dark text color for better visibility */
+}
+
+.suggestion-item:hover {
+    background-color: #f0f0f0;
+}
+
+.position-relative {
+    position: relative; /* Ensure that the dropdown is positioned relative to this container */
+}
+
+.form-inline {
+    display: flex; /* Make form a flex container */
+    align-items: center; /* Center items vertically */
+    margin: 0; /* Remove any default margin */
+}
+
+.form-control {
+    margin: 0; /* Remove any default margin */
+    width: 250px; /* Keep your desired width */
+}
+
+.autocomplete-items {
+    position: absolute; /* Keep it absolutely positioned */
+    z-index: 1000; /* Ensure it appears above other elements */
+    background-color: white; /* Set a background color for visibility */
+    border: 1px solid #ccc; /* Optional: add a border for separation */
+    max-height: 200px; /* Optional: limit the height */
+    overflow-y: auto; /* Optional: allow scrolling if too many items */
+    width: 100%; /* Match the width of the input */
+    display: none; /* Start hidden, show it when there are results */
+    top: calc(100% + 2px); /* Position it just below the input with a smaller gap */
+}
+
+/* Show the dropdown when there are items */
+.autocomplete-items.show {
+    display: block; /* Change display to block when items are present */
+}
+
+/* Added styles for autocomplete items */
+.autocomplete-item {
+    padding: 10px; /* Padding for the items */
+    color: #333; /* Dark text for readability */
+}
+
+.autocomplete-item:hover {
+    background-color: #e63946; /* Change background on hover */
+    color: white; /* Change text color on hover */
+}
+
+.ko-table,
+.submission-table {
+    background-color: white; /* White background */
+    border: 2px solid transparent; /* Set border to transparent initially */
+}
+
+.ko-table,
+.submission-table {
+    background-color: white; /* White background */
+    border: none; /* Remove all borders around the table */
+}
+
+.ko-table th,
+.submission-table th {
+    background-color: rgba(56, 142, 60, 0.1); /* Light green for submission header */
+    color: #282c34; /* Dark color for text */
+    position: relative; /* Position for pseudo-elements */
+    border: none;
+}
+
+.ko-table th {
+    background-color: rgba(198, 40, 40, 0.1); /* Light red for KO header */
+}
+
+.ko-table th::before,
+.ko-table th::after,
+.submission-table th::before,
+.submission-table th::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #282c34;
+}
+
+.ko-table th::before,
+.submission-table th::before {
+    top: 0; /* Line above header */
+}
+
+.ko-table th::after,
+.submission-table th::after {
+    bottom: 0; /* Line below header */
+}
+
+.table th,
+.table td {
+    padding: 10px; /* Adjust padding as needed */
+}
+
+/* Optional: Remove borders for table cells */
+.table th,
+.table td,
+.table tr{
+    border: none; /* Remove internal borders */
+}
+
+.table>thead>tr>th{
+    border-bottom:0;
+}

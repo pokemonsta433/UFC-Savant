@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fighter Percentiles</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="container">
+  <h1>Percentiles for [[${fighterName}]]</h1>
+  <canvas id="percentileChart"></canvas>
+</div>
+
+<script>
+  const percentiles = {
+    wins: [[${percentiles.wins}]],
+    headsKO: [[${percentiles.headsKO}]],
+    tdSub: [[${percentiles.tdSub}]],
+    headsChin: [[${percentiles.headsChin}]],
+    kdAgainst: [[${percentiles.kdAgainst}]],
+    tdAgainst: [[${percentiles.tdAgainst}]],
+    numFights: [[${percentiles.numFights}]],
+    losses: [[${percentiles.losses}]],
+    tdAgainstSub: [[${percentiles.tdAgainstSub}]]
+  };
+  const labels = ["Num Fights", "Wins", "Losses", "Heads KO", "Heads Chin", "TD Sub", "TD Against Sub", "KD Against", "TD Against"];
+  const data = [
+    percentiles.numFights,
+    percentiles.wins,
+    percentiles.losses,
+    percentiles.headsKO,
+    percentiles.headsChin,
+    percentiles.tdSub,
+    percentiles.tdAgainstSub,
+    percentiles.kdAgainst,
+    percentiles.tdAgainst
+  ];
+
+  const ctx = document.getElementById('percentileChart').getContext('2d');
+  const percentileChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Percentile',
+        data: data,
+        backgroundColor: 'rgba(56, 142, 60, 0.5)',
+        borderColor: 'rgba(56, 142, 60, 1)',
+        borderWidth: 1,
+        barThickness: 20 // Adjust bar thickness if needed
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      scales: {
+        x: {
+          beginAtZero: true,
+          max: 100,
+          grid: {
+            display: false // Hides grid lines
+          }
+        },
+        y: {
+          grid: {
+            display: false // Hides grid lines
+          }
+        }
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function(tooltipItem) {
+              return `Percentile: ${tooltipItem.raw}`; // Customize tooltip
+            }
+          }
+        }
+      },
+    },
+    plugins: [{
+      afterDatasetsDraw: function(chart) {
+        const ctx = chart.ctx;
+        chart.data.datasets.forEach(function(dataset, index) {
+          const meta = chart.getDatasetMeta(index);
+          meta.data.forEach(function(bar, barIndex) {
+            const value = dataset.data[barIndex];
+            const x = bar.x; // Position circle to the right of the bar
+            const y = bar.y; // Center the circle vertically
+
+            // Draw circle
+            ctx.beginPath();
+            ctx.arc(x, y, 16, 0, Math.PI * 2); // Circle with radius of 12
+            ctx.fillStyle = 'rgba(56, 142, 60, 1)'; // Circle color
+            ctx.fill();
+            ctx.closePath();
+
+            // Draw text inside the circle
+            ctx.save();
+            ctx.fillStyle = 'white'; // Text color
+            ctx.font = 'bold 10px Arial'; // Text style
+            ctx.textAlign = 'center'; // Center text
+            ctx.textBaseline = 'middle'; // Middle align
+            ctx.fillText(value.toFixed(1), x, y); // Draw the value with one decimal point
+            ctx.restore();
+          });
+        });
+      }
+    }]
+  });
+
+</script>
+</body>
+</html>
